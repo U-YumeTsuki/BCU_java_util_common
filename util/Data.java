@@ -1472,7 +1472,7 @@ public class Data {
 				String trimmed = def.trim().replace("\n","");
 				if (trimmed.isEmpty())
 					return true;
-				String[] conditions = trimmed.split("\\|\\|");//Spaces are only for user-reading
+				String[] conditions = trimmed.split("\\|\\|(?![^()]*+\\))");//Spaces are only for user-reading
 				for (String cond : conditions) {
 					if (failedCondition(cond.trim(), roots))
 						continue;
@@ -1484,7 +1484,7 @@ public class Data {
 			private static final String[] COMPARE_OPERATORS = {"==","!=",">=",">","<=","<", "instanceof"};
 
 			private static boolean failedCondition(String condition, Map<String, Object> roots) {
-				String[] ands = condition.split("&&");
+				String[] ands = condition.split("&&(?![^()]*+\\))");
 				for (String and : ands) {
 					String raw = and.replaceAll("\\(?.*?\\)", ""), operation = "B";//Boolean is the default to try
 					for (String comp : COMPARE_OPERATORS)
@@ -1516,8 +1516,8 @@ public class Data {
 						} else {
 							int sepIndex = raw.indexOf(operation) + (and.length() - raw.length());
 							boolean matchAny = raw.charAt(inv ? 2 : 1) == '^';
-							Object def = getOperated(and.substring((inv ? 0 : 1) + (matchAny ? 1 : 0), sepIndex), roots);
-							Object second = getOperated(and.substring(sepIndex + operation.length()), roots);
+							Object def = getOperated(and.substring((inv ? 0 : 1) + (matchAny ? 1 : 0), sepIndex).trim(), roots);
+							Object second = getOperated(and.substring(sepIndex + operation.length()).trim(), roots);
 							if (def != null && def.getClass().isArray() && second != null && !second.getClass().isArray()) {
 								if (matchAny) {
 									boolean failed = true;
@@ -1551,6 +1551,7 @@ public class Data {
 						}
 					} catch (Exception e) {
 						CommonStatic.ctx.printErr(ErrType.WARN, "Error in proc condition [" + condition + "]: " + e.getMessage());
+						e.printStackTrace();
 					}
 				}
 				return false;
@@ -1593,12 +1594,79 @@ public class Data {
 			}
 
 			private static Object getOperated(String fields, Map<String, Object> roots) throws Exception {
-				//String[] fs = fields.split("[+*/%\\-]\\s*");
-				//TODO: Arithmetic operation support
-				return getRec(fields, roots);
+				return recOperated(fields, roots, 0);
 			}
 
-			private static Object getRec(String fields, Map<String, Object> roots) throws Exception {
+			private static final String[] operators = {"\\+","--","\\*","/","%","\\|","&"};
+			private static Object recOperated(String fields, Map<String, Object> roots, int ci) throws Exception {
+				if (ci >= operators.length)
+					return getObject(fields, roots);
+				String[] spl = fields.split(operators[ci] + "(?![^()]*+\\))");
+				if (spl.length == 1)
+					return recOperated(fields, roots, ci + 1);
+
+				Object[] nums = new Object[spl.length];
+				for (int i = 0; i < nums.length; i++)
+					nums[i] = recOperated(spl[i].trim(), roots, ci + 1);
+
+				if (nums[0].getClass() == Double.class)
+					return sumDouble((double)nums[0], nums, ci, 0);
+				int total = (int)nums[0];
+				for (int i = 1; i < nums.length; i++) {
+					if (nums[i].getClass() == Double.class)
+						return sumDouble(total, nums, ci, i);
+					if (nums[i].getClass() == Integer.class)
+						switch (ci) {
+							case 6:
+								total &= (int)nums[i];
+								break;
+							case 5:
+								total |= (int)nums[i];
+								break;
+							case 4:
+								total %= (int)nums[i];
+								break;
+							case 3:
+								total /= (int)nums[i];
+								break;
+							case 2:
+								total *= (int)nums[i];
+								break;
+							case 1:
+								total += (int)nums[i];
+								break;
+							case 0:
+								total -= (int)nums[i];
+								break;
+						}
+				}
+				return total;
+			}
+			private static double sumDouble(double total, Object[] nums, int ci, int i) throws Exception {
+				if (ci >= 4)
+					throw new Exception("&, %, and | operators not allowed on doubles");
+				for (; i < nums.length; i++) {
+					if (!(nums[i] instanceof Number))
+						continue;
+					switch (ci) {
+						case 3:
+							total /= (double) nums[i];
+							break;
+						case 2:
+							total *= (double) nums[i];
+							break;
+						case 1:
+							total += (double) nums[i];
+							break;
+						case 0:
+							total -= (double) nums[i];
+							break;
+					}
+				}
+				return total;
+			}
+
+			private static Object getObject(String fields, Map<String, Object> roots) throws Exception {
 				if (fields.equals("null"))
 					return null;
 				if (CommonStatic.isInteger(fields))
@@ -1611,14 +1679,54 @@ public class Data {
 					return fields.substring(1, fields.length()-1);
 
 				String[] fs = fields.split("\\.(?![^()]*+\\))");
-				Object current = roots.get(fs[0]);
-				if (current == null) {
-					if (roots.containsKey(fs[0]))
-						return null;
-					throw new Exception("Root object " + fs[0] + " not found. Available root items: " + getRoots(roots));
+				int ini = 1;
+				Object current;
+				boolean neg;
+				if (fs[0].charAt(0) == '_') {
+					neg = fs[0].charAt(1) == '-';
+					String clz = fs[0].substring(neg ? 2 : 1).replace(":",".");
+					Method m = Class.forName(clz).getMethod(fs[1].substring(0, fs[1].indexOf("(")));
+					boolean acc = m.isAccessible();
+					m.setAccessible(true);
+					if (m.getParameterCount() == 0)
+						current = m.invoke(null);
+					else {
+						Object[] objs = new Object[m.getParameterCount()];
+						String[] parameters = fs[1].substring(fs[1].indexOf("(") + 1, fs[1].lastIndexOf(")")).split(",(?![^()]*+\\))");
+						if (parameters.length != objs.length)
+							throw new IllegalArgumentException("Function " + m + " requires " + m.getParameterCount() + " parameters, but only " + parameters.length + " were passed");
+						for (int i = 0; i < objs.length; i++) {
+							if (m.getParameterTypes()[i] == boolean.class)
+								objs[i] = check(parameters[i], roots);
+							else {
+								String raw = parameters[i].replaceAll("\\(?.*?\\)", "");
+								boolean con = true;
+								for (String comp : COMPARE_OPERATORS)
+									if (raw.contains(comp)) {
+										objs[i] = check(parameters[i], roots);
+										con = false;
+										break;
+									}
+								if (con)
+									objs[i] = getOperated(parameters[i], roots);
+							}
+						}
+						current = m.invoke(null, objs);
+					}
+					m.setAccessible(acc);
+				} else {
+					neg = fs[0].charAt(0) == '-';
+					if (neg)
+						fs[0] = fs[0].substring(1);
+					current = roots.get(fs[0]);
+					if (current == null) {
+						if (roots.containsKey(fs[0]))
+							return null;
+						throw new Exception("Root object " + fs[0] + " not found. Available root items: " + getRoots(roots));
+					}
 				}
-				for (int j = 1; j < fs.length; j++) {
-					String f = fs[j];
+				for (int j = ini; j < fs.length; j++) {
+					String f = fs[j].trim();
 					if (f.endsWith(")")) {
 						Method m = current.getClass().getMethod(f.substring(0, f.indexOf("(")));
 						boolean acc = m.isAccessible();
@@ -1665,7 +1773,7 @@ public class Data {
 								Map<String, Object> aroot = new HashMap<>();
 								for (int i = 0; i < ints.length; i++) {
 									aroot.put("obj", arr[ints[i]]);
-									finals[i] = getRec(str, aroot);
+									finals[i] = getOperated(str, aroot);
 								}
 								current = finals;
 							}
@@ -1677,6 +1785,12 @@ public class Data {
 						current = fld.get(current);
 						fld.setAccessible(acc);
 					}
+				}
+				if (neg) {
+					if (current instanceof Double)
+						current = ((double) current) * -1;
+					else if (current instanceof Integer)
+						current = ((int)current) * -1;
 				}
 				return current;
 			}

@@ -539,7 +539,7 @@ public class Editors {
 			setComponentVisibility(eg, !def || t.prob > 0, 1);
 			setComponentVisibility(eg, !def || (t.prob > 0 && ((!edi.isEnemy() && t.id == null) || (t.id != null && t.id.cls == Unit.class))), 2, 3);
 			setComponentVisibility(eg, !def || t.amount >= 2, 9, 10);
-			setComponentVisibility(eg, !def || t.layer_type == CommonStatic.LayerType.ORIG, 10, 12);
+			setComponentVisibility(eg, !def || t.layer_type != CommonStatic.LayerType.ORIG, 10, 12);
 		}));
 
 		map().put("MOVEWAVE", new EditControl<>(Proc.MOVEWAVE.class, (t) -> {
