@@ -206,7 +206,7 @@ public class AnimCE extends AnimCI {
 		for (int i = 0; i < mamodel.n; i++)
 			move[i] = i < ind ? i : i - 1;
 		mamodel.reorder(move);
-		int[] newl = new int[14];
+		int[] newl = new int[16];
 		newl[2] = Math.max(spr, 0);
 		newl[8] = newl[9] = newl[11] = 1000;
 		mamodel.parts[ind] = newl;

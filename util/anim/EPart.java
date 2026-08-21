@@ -67,7 +67,7 @@ public class EPart extends ImgCore implements Comparable<EPart> {
 	private final int ind;
 	private EPart fa, para;
 	private int par, id, img;
-	private P pos = new P(0, 0), piv = new P(0, 0), sca = new P(0, 0);
+	private P pos = new P(0, 0), piv = new P(0, 0), sca = new P(0, 0), shear = new P(0, 0);
 	private int z, glow;
 	private float angle, opacity, extendX, extendY, gsca;
 	private int hf, vf;
@@ -150,6 +150,10 @@ public class EPart extends ImgCore implements Comparable<EPart> {
 		} else if (m == 52 || m == 54) {
 			extendY = v;
 			rand = m == 54;
+		} else if (m == 55) {
+			shear.x = args[14] + v;
+		} else if (m == 56) {
+			shear.y = args[15] + v;
 		} else
 			CommonStatic.ctx.printErr(ErrType.NEW, "unhandled modification " + m);
 	}
@@ -196,6 +200,10 @@ public class EPart extends ImgCore implements Comparable<EPart> {
 			return df.format(extendY);
 		else if (m == 53)
 			return df.format(gsca);
+		else if (m == 55)
+			return df.format(shear.x);
+		else if (m == 56)
+			return df.format(shear.y);
 		else
 			System.out.println("EPart modification can be: " + m);
 		return "?";
@@ -294,6 +302,7 @@ public class EPart extends ImgCore implements Comparable<EPart> {
 		angle = args[10] * (b.flipped ? -1 : 1);
 		opacity = args[11];
 		glow = args[12];
+		shear = shear.setTo(args[14], args[15]);
 		gsca = b.model.ints[0];
 		hf = vf = 1;
 		extendX = extendY = 0;
@@ -402,6 +411,7 @@ public class EPart extends ImgCore implements Comparable<EPart> {
 		}
 		if (angle != 0)
 			g.rotate((float) (Math.PI * 2 * angle / b.model.ints[1]));
+		g.shear(shear.x / b.model.ints[1], shear.y / b.model.ints[1]);
 
 		if (fa != null)
 			P.delete(siz);

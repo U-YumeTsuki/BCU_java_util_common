@@ -35,6 +35,8 @@ public interface FakeGraphics {
 
 	void scale(float hf, float vf);
 
+	void shear(float x, float y);
+
 	void setColor(int c);
 
 	void setColor(int r, int g, int b);

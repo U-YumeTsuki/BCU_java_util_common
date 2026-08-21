@@ -41,7 +41,7 @@ public class MaModel extends Data implements Cloneable, BattleStatic {
 	public MaModel() {
 		n = 1;
 		m = 1;
-		parts = new int[][] { { -1, -1, 0, 0, 0, 0, 0, 0, 1000, 1000, 0, 1000, 0, 0 } };
+		parts = new int[][] { { -1, -1, 0, 0, 0, 0, 0, 0, 1000, 1000, 0, 1000, 0, 0, 0, 0 } };
 		ints = new int[] { 1000, 3600, 1000 };
 		confs = new int[][] { { 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0 } };
 		strs0 = new String[] { "def" };
@@ -51,14 +51,15 @@ public class MaModel extends Data implements Cloneable, BattleStatic {
 		qs.poll();
 		qs.poll();
 		n = Integer.parseInt(qs.poll().trim());
-		parts = new int[n][14];
+		parts = new int[n][16];
 		strs0 = new String[n];
 		for (int i = 0; i < n; i++) {
 			String[] ss = qs.poll().trim().split(",");
-			for (int j = 0; j < 13; j++)
+			int end = ss.length >= 15 ? 15 : 13;
+			for (int j = 0; j < end; j++)
 				parts[i][j] = Integer.parseInt(ss[j].trim());
-			if (ss.length == 14)
-				strs0[i] = restrict(ss[13]);
+			if (ss.length == end+1)
+				strs0[i] = restrict(ss[end]);
 			else
 				strs0[i] = "";
 		}
@@ -144,7 +145,7 @@ public class MaModel extends Data implements Cloneable, BattleStatic {
 		strs0 = new String[move.length];
 		for (int i = 0; i < n; i++)
 			if (move[i] < 0 || move[i] >= data.length) {
-				parts[i] = new int[] { 0, -1, 0, 0, 0, 0, 0, 0, 1000, 1000, 0, 1000, 0, 0 };
+				parts[i] = new int[] { 0, -1, 0, 0, 0, 0, 0, 0, 1000, 1000, 0, 1000, 0, 0, 0, 0 };
 				strs0[i] = "new part";
 			} else {
 				parts[i] = data[move[i]];
