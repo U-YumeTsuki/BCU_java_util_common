@@ -175,6 +175,10 @@ public class Orb extends Data {
 	public int minForm;
 	public int minLv;
 
+	@JsonClass.JCConstructor
+	public Orb() {
+	}
+
 	public Orb(int minForm, int minLv) {
 		this.minForm = minForm;
 		this.minLv = minLv;
