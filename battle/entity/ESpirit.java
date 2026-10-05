@@ -41,7 +41,9 @@ public class ESpirit extends EUnit {
     public void update() {
         auras.updateAuras();
         // update attack status when in attack state
-        if (atkm.atkTime > 1)
+        if (anim.dead > 0)
+            anim.dead -= getTimeFreeze();
+        else if (atkm.atkTime > 1)
             atkm.updateAttack();
         else
             atkm.atkTime -= getTimeFreeze();
@@ -60,6 +62,6 @@ public class ESpirit extends EUnit {
 
     @Override
     public int touchable() {
-        return TCH_N;
+        return kbTime == -1 ? TCH_SOUL : TCH_N;
     }
 }

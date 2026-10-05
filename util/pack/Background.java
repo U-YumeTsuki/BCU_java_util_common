@@ -189,8 +189,9 @@ public class Background extends AnimI<Background, Background.BGWvType> implement
 
 			if(bg.reference != null) {
 				Background ref = bg.reference.get();
-
-                if (ref.overlay != null) {
+				if (ref == null) {
+					 bg.img = new VImg(VFile.get("./org/img/bg/bg"+Data.trio(bg.reference.id)+".png"));
+				} else if (ref.overlay != null) {
                     bg.overlay = ref.overlay.clone();
                     bg.overlayAlpha = ref.overlayAlpha;
                 }

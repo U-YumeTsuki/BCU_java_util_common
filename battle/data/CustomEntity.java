@@ -17,6 +17,14 @@ import java.util.List;
 @JsonClass(noTag = NoTag.LOAD)
 public abstract class CustomEntity extends DataEntity {
 
+	@JsonClass(noTag = NoTag.LOAD)
+	public static class AttackPattern {
+		@JsonField(gen = GenType.GEN)
+		public AtkDataModel[] atks = new AtkDataModel[0];
+		public int share;
+		public String condition, display;
+	}
+
 	@JsonField(gen = GenType.GEN, defval = "proc isBlank")
 	public AtkDataModel rep;//TODO - Replace this with a Proc variable, given that is the only thing that gets used about it
 	@JsonField(gen = GenType.GEN)
@@ -29,6 +37,8 @@ public abstract class CustomEntity extends DataEntity {
 	public ArrayList<AtkDataModel[]> hits = new ArrayList<>();
 	@JsonField(gen = GenType.GEN)
 	public int[] share;
+	@JsonField(gen = GenType.GEN)
+	public String[] procConditions;
 
 	public int base;
 	@JsonField(defval = "1")
@@ -41,6 +51,7 @@ public abstract class CustomEntity extends DataEntity {
 		hits.add(new AtkDataModel[1]);
 		hits.get(0)[0] = new AtkDataModel(this);
 		share = new int[]{1};
+		procConditions = new String[]{""};
 	}
 
 	/**
@@ -189,6 +200,11 @@ public abstract class CustomEntity extends DataEntity {
 	@Override
 	public int getShare(int atk) {
 		return share[atk];
+	}
+
+	@Override
+	public String getProcCondition(int atk) {
+		return procConditions[atk];
 	}
 
 	@Override
@@ -434,13 +450,17 @@ public abstract class CustomEntity extends DataEntity {
 			hits.get(hits.size() - 1)[0] = new AtkDataModel(this);
 			share = Arrays.copyOf(share, hits.size());
 			share[hits.size() - 1] = 1;
+			procConditions = Arrays.copyOf(procConditions, hits.size());
 		} else {
 			hits.remove(del);
 			int[] newShare = new int[hits.size()];
+			String[] newCond = new String[hits.size()];
 			for (int i = 0; i < newShare.length; i++) {
 				newShare[i] = share[i < del ? i : i + 1];
+				newCond[i] = procConditions[i < del ? i : i + 1];
 			}
 			share = newShare;
+			procConditions = newCond;
 		}
 	}
 
@@ -451,6 +471,8 @@ public abstract class CustomEntity extends DataEntity {
 				traits.remove(i);
 				i--;
 			}
+		if (procConditions.length != share.length)
+			procConditions = Arrays.copyOf(procConditions, share.length);
 	}
 
 	@JsonField(tag = "atks", io = JsonField.IOType.W, gen = GenType.GEN, usePool = true, backCompat = CompatType.UPST)

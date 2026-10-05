@@ -52,6 +52,10 @@ public interface MaskEntity extends BattleStatic {
 		return 1;
 	}
 
+	default String getProcCondition(int atk) {
+		return "";
+	}
+
 	default AtkDataModel[][] getSpAtks(boolean addCounter) {
 		return new AtkDataModel[0][];
 	}

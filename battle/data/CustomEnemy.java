@@ -34,6 +34,7 @@ public class CustomEnemy extends CustomEntity implements MaskEnemy {
 		this();
 		share = new int[ene.anim.getAtkCount()];
 		share[0] = 1;
+		procConditions = new String[share.length];
 		for (int i = hits.size(); i < share.length; i++) {
 			hits.add(new AtkDataModel[1]);
 			hits.get(i)[0] = new AtkDataModel(this);

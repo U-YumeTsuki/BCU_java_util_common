@@ -162,10 +162,10 @@ public abstract class AtkModelEntity extends AtkModelAb {
 		return dmg;
 	}
 
-	public int predictDamage(int ind) {
+	public int predictDamage(int ind, Map<String, Object> roots) {
 		int total = 0;
 		MaskAtk[] atks = data.getAtks(ind);
-		if (atks == null)
+		if (atks == null || !Proc.Condition.check(e.data.getProcCondition(ind), roots))
 			return 0;
 		for (int i = 0; i < atks.length; i++) {
 			if (act[ind][i] == 0)
@@ -180,8 +180,8 @@ public abstract class AtkModelEntity extends AtkModelAb {
 		return total;
 	}
 
-	public boolean isUsable(int ind) {
-		if (act[ind] == null)
+	public boolean isUsable(int ind, Map<String, Object> roots) {
+		if (act[ind] == null || Proc.Condition.check(e.data.getProcCondition(ind), roots))
 			return false;
 		for (int act : act[ind])
 			if (act != 0)

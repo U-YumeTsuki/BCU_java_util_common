@@ -410,9 +410,9 @@ public abstract class Entity extends AbEntity implements Comparable<Entity> {
 				effs[A_SLOW] = null;
 			if (e.status.weaks.isEmpty())
 				effs[A_DOWN] = null;
-			if (e.status.check_Lethargy(false))
+			if (!e.status.check_Lethargy(false))
 				effs[A_LETHARGY] = null;
-			if (e.status.check_Lethargy(true))
+			if (!e.status.check_Lethargy(true))
 				effs[A_LETHARGY_OLD] = null;
 			if (e.status.curse <= 0)
 				effs[A_CURSE] = null;
@@ -681,12 +681,13 @@ public abstract class Entity extends AbEntity implements Comparable<Entity> {
 		}
 
 		private void setUp() {
+			Map<String, Object> roots = CommonStatic.rootMap(new String[]{"unit"},e);
 			if (e.data.realAtkCount() > 1) {
 				int old = e.aam.atkType;
 				if (e.getProc().AI.calcstrongest) {
 					int[] total = new int[e.data.getAtkTypeCount()];
 					for (int i = 0; i < total.length; i++)
-						total[i] += e.aam.predictDamage(i);
+						total[i] += e.aam.predictDamage(i, roots);
 
 					for (int i = e.data.firstAtk(); i < total.length; i++)
 						if (total[i] > total[e.aam.atkType])
@@ -696,11 +697,11 @@ public abstract class Entity extends AbEntity implements Comparable<Entity> {
 				} else {
 					int totShare = 0;
 					for (int i = 0; i < e.data.getAtkTypeCount(); i++)
-						if (e.aam.isUsable(i))
+						if (e.aam.isUsable(i, roots))
 							totShare += e.data.getShare(i);
 					int r = e.basis.r.nextInt(totShare);
 					for (int i = 0; i < e.data.getAtkTypeCount(); i++) {
-						if (!e.aam.isUsable(i))
+						if (!e.aam.isUsable(i, roots))
 							continue;
 						r -= e.data.getShare(i);
 						if (r < 0) {
@@ -711,7 +712,8 @@ public abstract class Entity extends AbEntity implements Comparable<Entity> {
 				}
 				if (old != e.aam.atkType)
 					setAtk();
-			}
+			} else if (!Proc.Condition.check(e.data.getProcCondition(e.aam.atkType), roots))
+				return;
 			startAtk(true);
 		}
 
@@ -1663,7 +1665,7 @@ public abstract class Entity extends AbEntity implements Comparable<Entity> {
 	/**
 	 * Alternate abilities changed by attacks
 	 */
-	private int altAbi = 0;
+	protected int altAbi = 0;
 
 	/**
 	 * determines whether to skip burrowing at spawn point

@@ -1469,6 +1469,8 @@ public class Data {
 			}
 
 			public static boolean check(String def, Map<String, Object> roots) {
+				if (def == null)
+					return true;
 				String trimmed = def.trim().replace("\n","");
 				if (trimmed.isEmpty())
 					return true;
@@ -1551,6 +1553,7 @@ public class Data {
 						}
 					} catch (Exception e) {
 						CommonStatic.ctx.printErr(ErrType.WARN, "Error in proc condition [" + condition + "]: " + e.getMessage());
+						System.out.println("Caused by proc condition: " + condition);
 						e.printStackTrace();
 					}
 				}
@@ -1609,11 +1612,11 @@ public class Data {
 				for (int i = 0; i < nums.length; i++)
 					nums[i] = recOperated(spl[i].trim(), roots, ci + 1);
 
-				if (nums[0].getClass() == Double.class)
-					return sumDouble((double)nums[0], nums, ci, 0);
-				int total = (int)nums[0];
+				if (nums[0].getClass() == Double.class || nums[0].getClass() == Float.class)
+					return sumDouble(((Number)nums[0]).doubleValue(), nums, ci, 1);
+				int total = ((Number)nums[0]).intValue();
 				for (int i = 1; i < nums.length; i++) {
-					if (nums[i].getClass() == Double.class)
+					if (nums[i].getClass() == Double.class || nums[0].getClass() == Float.class)
 						return sumDouble(total, nums, ci, i);
 					if (nums[i].getClass() == Integer.class)
 						switch (ci) {
@@ -1648,21 +1651,24 @@ public class Data {
 				for (; i < nums.length; i++) {
 					if (!(nums[i] instanceof Number))
 						continue;
+					double n = ((Number) nums[i]).doubleValue();
+					System.out.println(n);
 					switch (ci) {
 						case 3:
-							total /= (double) nums[i];
+							total /= n;
 							break;
 						case 2:
-							total *= (double) nums[i];
+							total *= n;
 							break;
 						case 1:
-							total += (double) nums[i];
+							total += n;
 							break;
 						case 0:
-							total -= (double) nums[i];
+							total -= n;
 							break;
 					}
 				}
+				System.out.println(total);
 				return total;
 			}
 
