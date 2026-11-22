@@ -318,10 +318,45 @@ public class PCoin extends Data {
 		return 1.0;
 	}
 
-	public int getReqLv(int i) {
-		int[] tal = info.get(i);
-		return tal[tal.length - 1];
+	public double getHealthMultiplication(int[] talents) {
+		return getStatPlusMultiplication(PC2_HP, PC2_HPP, talents);
 	}
+
+	public double getAtkMultiplication(int[] talents) {
+		return getStatPlusMultiplication(PC2_ATK, PC2_ATKP, talents);
+	}
+
+	public double getStatPlusMultiplication(byte mult, byte plus, int[] talents) {
+		int atkMultiplier = 0;
+		int atkPlusMultiplier = 100;
+
+		for(int i = 0; i < info.size(); i++) {
+			if(info.get(i)[0] >= PC_CORRES.length || talents[i] == 0 || info.get(i)[0] < 0)
+				continue;
+
+			int[] type = PC_CORRES[info.get(i)[0]];
+			if(type[0] == PC_BASE && (type[1] == mult || type[1] == plus)) {
+				int maxlv = info.get(i)[1];
+				int[] modifs = new int[4];
+				if (maxlv > 1) {
+					for (int j = 0; j < 4; j++) {
+						int v0 = info.get(i)[2 + j * 2];
+						int v1 = info.get(i)[3 + j * 2];
+						modifs[j] = (v1 - v0) * (talents[i] - 1) / (maxlv - 1) + v0;
+					}
+				}
+				if (maxlv == 0)
+					for (int j = 0; j < 4; j++)
+						modifs[j] = info.get(i)[3 + j * 2];
+
+				if (type[1] == mult)
+					atkMultiplier = modifs[0];
+				else
+					atkPlusMultiplier = 1 + modifs[0];
+			}
+		}
+		return (100 + atkMultiplier) * atkPlusMultiplier / 10000.0;
+    }
 
 	@OnInjected
 	public void onInjected() {

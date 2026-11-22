@@ -41,13 +41,16 @@ public class Formatter {
         @JsonField
         public final double[] magnification;
 		public final double fruitMag;
+		@JsonField
+		public final CommonStatic.Lang.Locale locale;
 
 		public DecimalFormat df = new DecimalFormat("#.##");
 
-		public Context(boolean ene, boolean sec, double[] magnif, SortedPackSet<Trait> trs) {
+		public Context(boolean ene, boolean sec, double[] magnif, SortedPackSet<Trait> trs, CommonStatic.Lang.Locale loc) {
 			isEnemy = ene;
 			useSecond = sec;
 			magnification = magnif;
+			locale = loc;
 
 			if (isEnemy || trs == null)
 				fruitMag = 1;
@@ -143,6 +146,37 @@ public class Formatter {
 		public String waveRange(int lv) {
 			return df.format((isEnemy ? 467.25 : 332.5) + 200 * (lv - 1));
 		}
+
+		public String ordinal(int value) {
+			switch (locale) {
+				case KR -> {
+					return value + " 번째";
+				}
+				case JP -> {
+					return value + " 回目";
+				}
+				case ZH -> {
+					return "第 " + value + " 次";
+				}
+				default -> {
+					int twoDigit = Math.abs(value) % 100;
+
+					if (twoDigit >= 11 && twoDigit <= 13) {
+						return value + "th";
+					}
+
+					int firstDigit = Math.abs(value) % 10;
+
+					return switch (firstDigit) {
+						case 1 -> value + "st";
+						case 2 -> value + "nd";
+						case 3 -> value + "rd";
+						default -> value + "th";
+					};
+				}
+			}
+		}
+
 
 		public String resDiv(double mult) {
 			return df.format(mult / 100.0);

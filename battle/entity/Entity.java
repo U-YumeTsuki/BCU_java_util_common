@@ -1761,7 +1761,7 @@ public abstract class Entity extends AbEntity implements Comparable<Entity> {
 	 */
 	protected Entity(StageBasis b, MaskEntity de, EAnimU ea, float lvMagnif, PCoin pc, Level lv, int layer) {
 		super((pc != null && lv != null && lv.getTalents().length == pc.max.length) ?
-				(int) ((1 + b.elu.getInc(Data.C_DEF,((MaskUnit)de).getPack()) * 0.01) * (int) ((int) (Math.round(de.getHp() * lvMagnif) * b.b.t().getDefMulti()) * pc.getStatMultiplication(Data.PC2_HP, lv.getTalents()))) :
+				(int) ((1 + b.elu.getInc(Data.C_DEF,((MaskUnit)de).getPack()) * 0.01) * (int) ((int) (Math.round(de.getHp() * lvMagnif) * b.b.t().getDefMulti()) * pc.getHealthMultiplication(lv.getTalents()))) :
 				(int) ((1 + b.elu.getInc(Data.C_DEF,((MaskUnit)de).getPack()) * 0.01) * (int) (Math.round(de.getHp() * lvMagnif) * b.b.t().getDefMulti()))
 		);
 		basis = b;
