@@ -79,9 +79,8 @@ public class PCoin extends Data {
 		this.du = du;
 		trait = Trait.convertBitmask(strs[1], true);
 
-		for (int i = 0; i < 8; i++) {
-			if (2 + i * 14 >= strs.length)
-				break;
+		int i = 0;
+		while (2 + i * 14 < strs.length) {
 			if (strs[2 + i * 14] != 0) {
 				int[] data = new int[14]; //Default length of BC
 				for (int j = 0; j < 14; j++)
@@ -108,8 +107,9 @@ public class PCoin extends Data {
 				trueArr[trueArr.length - 1] = Math.max(0, data[13]);
 				info.add(trueArr);
 			}
+			i++;
 		}
-		max = info.stream().mapToInt(i -> Math.max(1, i[1])).toArray();
+		max = info.stream().mapToInt(ind -> Math.max(1, ind[1])).toArray();
 		((DataUnit)du).pcoin = this;
 		full = improve(max);
 	}

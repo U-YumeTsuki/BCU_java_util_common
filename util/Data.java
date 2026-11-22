@@ -2119,6 +2119,13 @@ public class Data {
 			}
 		}
 
+		public static class MULTCOUNT extends ProcItem {
+			@Order(0)
+			public int mult;
+			@Order(1)
+			public int count;
+		}
+
 		public static Proc blank() {
 			return new Proc();
 		}
@@ -2303,6 +2310,9 @@ public class Data {
 		public final PMC COMBOCOOLDOWN = new PMC(); //CD,Count
 		@Order(85)
 		public final IMUAD IMUDELAY = new IMUAD(); //CD,Count
+		@Order(86)
+		public final MULTCOUNT CDDEC = new MULTCOUNT();
+
 		public final PTC IMUATKANY = new PTC();//This is just Dodge, but ignores traits. Not a toggle coz orbs
 
 		@Override
@@ -2738,7 +2748,8 @@ public class Data {
 	public static final byte P_COMBOCOOLDOWN = 84;
 	public static final byte P_IMUDELAY = 85;
 	public static final byte P_IMUALL = 86;
-	public static final byte PROC_TOT = 87;
+	public static final int P_CDDEC = 87; // Decreases cooldown
+	public static final byte PROC_TOT = 88;
 
 	public static final int SCORE_WEAK = 0;
 	public static final int SCORE_STOP = 1;
@@ -2838,7 +2849,8 @@ public class Data {
 			true,  //Strengthen When Defeating (Berserk)
 			true,  //Delay Immunity
 			true,  //ComboCooldown
-			true   //Dodge all
+			true,  //Dodge all
+			false //shortened cost
 	};
 
 	/**
@@ -2869,8 +2881,10 @@ public class Data {
 	public static final byte PC2_CD = 4;
 	public static final byte PC2_HB = 5;
 	public static final byte PC2_TBA = 6;
-	public static final byte PC2_RNG = 7;
-	public static final byte PC2_TOT = 8;
+	public static final byte PC2_ATKP = 7;
+	public static final byte PC2_HPP = 8;
+	public static final byte PC2_RNG = 9;
+	public static final byte PC2_TOT = 10;
 	// -1 for None
 	// 0 for Proc
 	// 1 for Ability
@@ -2948,7 +2962,10 @@ public class Data {
 			{ PC_AB, AB_SKILL }, //66 : super sage hunter
 			{ PC_P, P_BLAST }, //67 : Baja Blast
 			{ PC_P, P_DEMONVOLC }, //68 : Counter-Surge
-			{ PC_IMU, P_IMUBLAST } // 69: immune to blast todo: when resist blast comes, connect to that talent
+			{ PC_IMU, P_IMUBLAST }, // 69: immune to blast todo: when resist blast comes, connect to that talent
+			{ PC_BASE, PC2_ATKP, 1, -1 }, // 70: inc ATK+
+			{ PC_BASE, PC2_HPP, 1, -1 }, // 71: inc HP+
+			{ PC_P, P_CDDEC, 3, -1 } // cd decrease
 	};
 	public static final int[][] PC_CUSTOM = new int[][] { //Use negative ints to handle (it would be so awesome, it would be so cool)
 			{ -1, 0 }, // 0:
