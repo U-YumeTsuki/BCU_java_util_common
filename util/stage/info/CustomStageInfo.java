@@ -13,6 +13,7 @@ import common.util.stage.StageMap;
 import common.util.unit.AbForm;
 import common.util.unit.Form;
 import common.util.unit.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -45,6 +46,8 @@ public class CustomStageInfo implements StageInfo {
     public int props;
     @JsonField(generic = Form.class, alias = Form.AbFormJson.class, backCompat = JsonField.CompatType.FORK, defval = "isEmpty")
     public final SortedPackSet<Form> rewards = new SortedPackSet<>();
+    @JsonField
+    public int[][] feverBarMultiplier = null; // [ Cost Range Start, Cost Range End, Multiplier ]
 
     @JsonClass.JCConstructor
     public CustomStageInfo() {
@@ -83,6 +86,12 @@ public class CustomStageInfo implements StageInfo {
         for (int i = 0; i < chances.size(); i++)
             FChances[i] = chances.get(i);
         return FChances;
+    }
+
+    @Nullable
+    @Override
+    public int[][] getFever() {
+        return feverBarMultiplier;
     }
 
     public void remove(Stage s) {
@@ -134,7 +143,7 @@ public class CustomStageInfo implements StageInfo {
             st.getMC().getSave(true).resetUnlockedUnits();
     }
     public boolean useless() {
-        return stages.isEmpty() && ubase == null && rewards.isEmpty();
+        return stages.isEmpty() && ubase == null && rewards.isEmpty() && feverBarMultiplier == null;
     }
 
     @JsonDecoder.OnInjected

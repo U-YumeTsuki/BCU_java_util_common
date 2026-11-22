@@ -126,6 +126,11 @@ public class DefStageInfo implements StageInfo {
         return exChances;
     }
 
+    @Override
+    public int[][] getFever() {
+        return feverBarMultiplier;
+    }
+
     public List<String> analyzeRewardChance() {
         ArrayList<String> res = new ArrayList<>();
 
