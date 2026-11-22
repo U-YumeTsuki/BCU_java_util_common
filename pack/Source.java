@@ -258,12 +258,10 @@ public abstract class Source {
 				write("mamodel.txt", anim.mamodel::write);
 
 				if (id.base.equals(BasePath.ANIM)) {
-					for (int i = 0; i < SourceAnimLoader.MA_ENTITY.length; i++) {
-						write(SourceAnimLoader.MA_ENTITY[i], anim.anims[i]::write);
-					}
-				} else {
+					for (int i = 0; i < anim.anims.length; i++)
+						write("maanim_", anim.anims[i]::write);
+				} else
 					write(SourceAnimLoader.MA_SOUL[0], anim.anims[0]::write);
-				}
 
 				if (anim.getEdi() != null) {
 					write("icon_display.png", anim.getEdi().getImg());

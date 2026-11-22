@@ -46,6 +46,10 @@ public class Formatter {
 
 		public DecimalFormat df = new DecimalFormat("#.##");
 
+		public Context(boolean ene, boolean sec, double[] magnif, SortedPackSet<Trait> trs) {
+			this(ene, sec, magnif, trs, CommonStatic.getConfig().langs[0]);
+		}
+
 		public Context(boolean ene, boolean sec, double[] magnif, SortedPackSet<Trait> trs, CommonStatic.Lang.Locale loc) {
 			isEnemy = ene;
 			useSecond = sec;

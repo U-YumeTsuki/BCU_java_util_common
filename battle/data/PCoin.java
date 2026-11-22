@@ -279,6 +279,12 @@ public class PCoin extends Data {
 		}
 		return ans;
 	}
+
+	public int getReqLv(int i) {
+		int[] tal = info.get(i);
+		return tal[tal.length - 1];
+	}
+
 	@SuppressWarnings("deprecation")
 	private void improveAtks(AtkDataModel[] atkss, int ptype, int[] modifs, int fieldTOT, int offset) { //ptype is type[1]
 		for (AtkDataModel atk : atkss) {
