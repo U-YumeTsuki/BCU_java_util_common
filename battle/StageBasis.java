@@ -515,9 +515,9 @@ public class StageBasis extends BattleObj {
 
 	public int getCost(int i, int j) {
 		if (elu.price[i][j] == -1 || elu.price[i][j] == -2 || !(b.lu.fs[i][j] instanceof Form) || spawns.getOrDefault((Form)b.lu.fs[i][j], 0) % 2 == 0
-			|| ((EForm)b.lu.efs[i][j]).getLevel().getOrbs() == null)
+			|| b.lu.efs[i][j].getLevel().getOrbs() == null)
 			return elu.price[i][j];
-		int[][] orbes = ((EForm)b.lu.efs[i][j]).getLevel().getOrbs();
+		int[][] orbes = b.lu.efs[i][j].getLevel().getOrbs();
 		int mul = 100;
 		for (int[] orb : orbes)
 			if (orb.length == ORB_TOT && orb[ORB_TYPE] == ORB_LOWERCOST)

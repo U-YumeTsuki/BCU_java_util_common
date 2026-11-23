@@ -52,19 +52,32 @@ public class ELineUp extends BattleObj {
 						for (int k = 0; k < coms.size(); k++) {
 							LineUp.ComboBuff bf = inc[0];
 							Combo c = coms.get(k); //1st check to not have negative due to banned combo
-							if (coms.get(k).group != null)
+							if (c.group != null)
 								for (int l = 1; l < inc.length; l++)
 									if (inc[l].cg == c.group) {
 										bf = inc[l];
 										break;
 									}
-							if (bf.inc[i] > 0 && coms.get(k).containsForm((Form) lu.fs[i][j])) {
+							if (bf.inc[i] > 0 && c.containsForm((Form) lu.fs[i][j])) {
 								coms.remove(k--);
 								bf.inc[c.type] -= CommonStatic.getBCAssets().values[c.type][c.lv];
 							}
 						}
 					continue;
 				}
+				if (lu.efs[i][j] instanceof EForm && ((Form)lu.fs[i][j]).du.getPCoin() != null)
+					((Form)lu.fs[i][j]).du.getPCoin().getLockedTalentCombos(lu.efs[i][j].getLevel().getTalents()).forEach(c -> {
+						if (coms.remove(c)) {
+							LineUp.ComboBuff bf = inc[0];
+							if (c.group != null)
+								for (int l = 1; l < inc.length; l++)
+									if (inc[l].cg == c.group) {
+										bf = inc[l];
+										break;
+									}
+							bf.inc[c.type] -= CommonStatic.getBCAssets().values[c.type][c.lv];
+						}
+					});
 				price[i][j] = sb.globalPrice() > 0 ? sb.globalPrice() : (int) (lu.efs[i][j].getPrice(sb.st.getCont().price) * (100 - getInc(C_DISCOUNT, lu.fs[i][j])));
 				cool[i][j] = (sb.globalCdLimit() > 0 ? sb.b.t().getFinResGlobal((int)(sb.globalCdLimit()*lu.efs[i][j].initialRespawnDiff()), getInc(C_RESP, lu.fs[i][j])) : sb.b.t().getIniRes(lu.efs[i][j].getInitialRespawn(), getInc(C_RESP, lu.fs[i][j])));
 				maxC[i][j] = sb.globalCdLimit() > 0 ? sb.b.t().getFinResGlobal(sb.globalCdLimit(), getInc(C_RESP, lu.fs[i][j])) : sb.b.t().getFinRes(lu.efs[i][j].getRespawn(), getInc(C_RESP, lu.fs[i][j]));

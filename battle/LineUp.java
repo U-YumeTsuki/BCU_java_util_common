@@ -416,7 +416,8 @@ public class LineUp extends Data {
 					Form f = (Form) fs[k][j];
 					if (f == null)
 						break;
-					if (f.unit != fu.unit || !c.correctForm(i, f.fid))
+					if (f.unit != fu.unit || !c.correctForm(i, f.fid) ||
+							(f.du.getPCoin() != null && f.du.getPCoin().isComboLocked(getLv(f).getTalents(), c)))
 						continue;
 					if (foundRow == -2)
 						foundRow = k;
@@ -477,7 +478,7 @@ public class LineUp extends Data {
 				else {
 					efs[i][j] = IForm.newIns(fs[i][j], getLv(fs[i][j]));
 					if (efs[i][j] instanceof EForm)
-						((EForm) efs[i][j]).getLevel().revalidateOrb((Unit)fs[i][j].unit());
+						efs[i][j].getLevel().revalidateOrb((Unit)fs[i][j].unit());
 				}
 	}
 

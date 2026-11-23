@@ -123,6 +123,11 @@ public class ERUnit extends Data implements IForm {
         return unit.initial_cd;
     }
 
+    @Override
+    public Level getLevel() {
+        return level;
+    }
+
     static class DH {
         final IForm iform;
         final int share;

@@ -2,6 +2,7 @@ package common.util.unit;
 
 import common.CommonStatic;
 import common.battle.BasisLU;
+import common.battle.data.CustomUnit;
 import common.io.json.JsonClass;
 import common.io.json.JsonDecoder;
 import common.io.json.JsonField;
@@ -206,6 +207,23 @@ public class Combo extends Data implements IndexContainer.Indexable<IndexContain
 		forms = formSrc;
 		formRestriction = lims;
 		updateLUs();
+	}
+
+	public void destroy(PackData.UserPack pk) {
+		for (Unit u : pk.units)
+			for (Form f : u.forms)
+				if (f.du instanceof CustomUnit && f.du.getPCoin() != null) {
+					CustomUnit cu = (CustomUnit)f.du;
+					cu.pcoin.info.removeIf(tal -> {
+						if (tal[2] != id.id)
+							return false;
+						int[] cor = Data.get_CORRES(tal[0]);
+						return cor[0] == Data.PC_SPECIAL && cor[1] == Data.PC5_COMBO;
+					});
+					if (cu.pcoin.info.isEmpty())
+						cu.pcoin = null;
+				}
+		pk.combos.remove(this);
 	}
 
 	public boolean containsForm(Form f) {

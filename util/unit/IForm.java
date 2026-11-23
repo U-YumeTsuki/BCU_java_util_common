@@ -32,4 +32,6 @@ public interface IForm {
     default float initialRespawnDiff() {
         return 1f * getInitialRespawn() / getRespawn();
     }
+
+    public Level getLevel();
 }

@@ -302,6 +302,9 @@ public class Res extends ImgCore {
 		aux.icon[4][PC2_HB] = new VImg(parts[98]);
 		aux.icon[4][PC2_TBA] = new VImg(parts[305]);
 		aux.icon[4][PC2_RNG] = new VImg("./org/page/icons/PlusRange.png");
+		aux.icon[4][PC2_HPP] = new VImg(parts[393]);
+		aux.icon[4][PC2_ATKP] = new VImg(parts[392]);
+		aux.icon[1][P_CDDEC] = new VImg(parts[396]);
 		//miscellaneous
 		aux.miscIcons[0] = new VImg(parts[218]);
 		aux.miscIcons[1] = new VImg("./org/page/icons/LethargyOld.png");

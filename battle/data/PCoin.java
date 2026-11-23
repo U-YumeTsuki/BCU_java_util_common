@@ -6,12 +6,14 @@ import common.io.json.JsonDecoder.OnInjected;
 import common.io.json.JsonField;
 import common.pack.Context.ErrType;
 import common.pack.Identifier;
+import common.pack.PackData;
 import common.pack.SortedPackSet;
 import common.pack.UserProfile;
 import common.system.files.VFile;
 import common.util.Data;
 import common.util.Data.Proc.ProcItem;
 import common.util.unit.AbUnit;
+import common.util.unit.Combo;
 import common.util.unit.Trait;
 import common.util.unit.Unit;
 
@@ -91,6 +93,7 @@ public class PCoin extends Data {
 				int[] corres = get_CORRES(data[0]);
 				if (corres[0] == -1) {
 					CommonStatic.ctx.printErr(ErrType.NEW, "new PCoin ability for " + du.getPack() + " not yet handled by BCU: " + data[0] + "\nData is " + Arrays.toString(data));
+					i++;
 					continue;
 				}
 				int[] trueArr;
@@ -101,6 +104,11 @@ public class PCoin extends Data {
 					case PC_BASE:
 						trueArr = Arrays.copyOf(data, 5);
 						break;
+					case PC_SPECIAL:
+						if (corres[1] == PC5_COMBO) {
+							trueArr = Arrays.copyOf(data, 4);
+							break;
+						}
 					default:
 						trueArr = Arrays.copyOf(data, 3);
 				}
@@ -267,7 +275,7 @@ public class PCoin extends Data {
 				ans.getProc().getArr(type[1]).set(0, 100);
 			else if (type[0] == PC_TRAIT)
 				ans.getTraits(true).add(UserProfile.getBCData().traits.get(type[1]));
-			else if (type[0] == 5) { //special cases
+			else if (type[0] == PC_SPECIAL && type[1] != PC5_COMBO) { //special cases
 				if (type[1] == P_IMUWAVE)
 					ans.getProc().getArr(type[1]).set(1, 100);
 				else {
@@ -343,26 +351,62 @@ public class PCoin extends Data {
 			int[] type = PC_CORRES[info.get(i)[0]];
 			if(type[0] == PC_BASE && (type[1] == mult || type[1] == plus)) {
 				int maxlv = info.get(i)[1];
-				int[] modifs = new int[4];
+				int modif = 0;
 				if (maxlv > 1) {
-					for (int j = 0; j < 4; j++) {
-						int v0 = info.get(i)[2 + j * 2];
-						int v1 = info.get(i)[3 + j * 2];
-						modifs[j] = (v1 - v0) * (talents[i] - 1) / (maxlv - 1) + v0;
-					}
+					int v0 = info.get(i)[2];
+					int v1 = info.get(i)[3];
+					modif = (v1 - v0) * (talents[i] - 1) / (maxlv - 1) + v0;
 				}
 				if (maxlv == 0)
 					for (int j = 0; j < 4; j++)
-						modifs[j] = info.get(i)[3 + j * 2];
+						modif = info.get(i)[3 + j * 2];
 
 				if (type[1] == mult)
-					atkMultiplier = modifs[0];
+					atkMultiplier = modif;
 				else
-					atkPlusMultiplier = 1 + modifs[0];
+					atkPlusMultiplier = 100 + modif;
 			}
 		}
 		return (100 + atkMultiplier) * atkPlusMultiplier / 10000.0;
     }
+
+	public SortedPackSet<Combo> getLockedTalentCombos() {
+		return getLockedTalentCombos(new int[max.length]);
+	}
+
+	public SortedPackSet<Combo> getLockedTalentCombos(int[] talents) {
+		SortedPackSet<Combo> combos = new SortedPackSet<>();
+		PackData pac = du.getPack().getPack();
+		for (int i = 0; i < info.size(); i++) {
+			if(info.get(i)[0] >= PC_CORRES.length || talents[i] > 0 || info.get(i)[0] < 0)
+				continue;
+
+			int[] type = PC_CORRES[info.get(i)[0]];
+			if(type[0] == PC_SPECIAL && (type[1] == PC5_COMBO)) {
+				if (pac instanceof PackData.DefPack)
+					combos.add(pac.combos.getFromID(info.get(i)[2]-126));//126 corresponds to the unused catcombos methinks
+				else
+					combos.add(pac.combos.get(info.get(i)[2]));
+			}
+		}
+		return combos;
+	}
+
+	public boolean isComboLocked(int[] talents, Combo c) {
+		PackData pac = du.getPack().getPack();
+		for (int i = 0; i < info.size(); i++) {
+			if(info.get(i)[0] >= PC_CORRES.length || talents[i] > 0 || info.get(i)[0] < 0)
+				continue;
+			int[] type = PC_CORRES[info.get(i)[0]];
+			if(type[0] == PC_SPECIAL && (type[1] == PC5_COMBO)) {
+				if (pac instanceof PackData.DefPack && c.id.id == info.get(i)[2]-126)//126 corresponds to the unused catcombos methinks
+					return true;
+				else if (c.id.id == info.get(i)[2])
+					return true;
+			}
+		}
+		return false;
+	}
 
 	@OnInjected
 	public void onInjected() {
@@ -398,7 +442,7 @@ public class PCoin extends Data {
 				ni[ii.length - 1] = 0;
 
 			int[] COR = get_CORRES(ii[0]);
-			if (COR[0] == 5) {
+			if (COR[0] == PC_SPECIAL) {
 				if (COR[1] == P_IMUWAVE && ii[5] >= 100)
 					ni[0] = 23;//Port old waveblock talent
 				else if (COR[1] == P_DMGINC)
@@ -408,7 +452,7 @@ public class PCoin extends Data {
 			}
 
 			boolean add = ni[0] > 0; //Prevent custom talent porting coz it crash main
-			if (ni[0] == 5) {
+			if (ni[0] == PC_SPECIAL) {
 				for (int[] iii : oi)
 					if (iii[0] == 5) {
 						add = false;

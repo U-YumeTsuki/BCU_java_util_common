@@ -111,6 +111,7 @@ public class EForm extends Data implements IForm {
 		level.setPlusLevel(CommonStatic.getConfig().plus ? level.getPlusLv() : 0);
 	}
 
+	@Override
 	public Level getLevel() {
 		return level;
 	}

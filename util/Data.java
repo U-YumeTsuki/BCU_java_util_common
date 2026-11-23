@@ -2873,7 +2873,7 @@ public class Data {
 	public static final byte WT_MEGA = 64;
 	public static final byte WT_BLST = 32;
 	public static final byte WT_SOUL = 64; // for death surge check
-	public static final byte PC_P = 0, PC_AB = 1, PC_BASE = 2, PC_IMU = 3, PC_TRAIT = 4;
+	public static final byte PC_P = 0, PC_AB = 1, PC_BASE = 2, PC_IMU = 3, PC_TRAIT = 4, PC_SPECIAL = 5;
 	public static final byte PC2_HP = 0;
 	public static final byte PC2_ATK = 1;
 	public static final byte PC2_SPEED = 2;
@@ -2885,6 +2885,7 @@ public class Data {
 	public static final byte PC2_HPP = 8;
 	public static final byte PC2_RNG = 9;
 	public static final byte PC2_TOT = 10;
+	public static final byte PC5_COMBO = 1;
 	// -1 for None
 	// 0 for Proc
 	// 1 for Ability
@@ -2898,9 +2899,9 @@ public class Data {
 			{ PC_P, P_STOP }, // 2: stop
 			{ PC_P, P_SLOW }, // 3: slow
 			{ PC_AB, AB_ONLY }, // 4:Target Obnly
-			{ 5, P_DMGINC, 150 }, // 5:Strong Vs.
-			{ 5, P_DEFINC, 400 }, // 6:Resistant
-			{ 5, P_DMGINC, 300 }, // 7:Massive Dmg
+			{ PC_SPECIAL, P_DMGINC, 150 }, // 5:Strong Vs.
+			{ PC_SPECIAL, P_DEFINC, 400 }, // 6:Resistant
+			{ PC_SPECIAL, P_DMGINC, 300 }, // 7:Massive Dmg
 			{ PC_P, P_KB }, // 8: kb
 			{ PC_P, P_WARP }, // 9:Warp
 			{ PC_P, P_STRONG }, // 10: berserker, reversed health
@@ -2916,7 +2917,7 @@ public class Data {
 			{ PC_P, P_IMUSLOW }, // 20: res slow
 			{ PC_P, P_IMUKB }, // 21: res kb
 			{ PC_P, P_IMUWAVE }, // 22: res wave
-			{ 5, P_IMUWAVE }, // 23: waveblock
+			{ PC_SPECIAL, P_IMUWAVE }, // 23: waveblock
 			{ PC_P, P_IMUWARP }, // 24: res warp
 			{ PC_BASE, PC2_COST }, // 25: reduce cost
 			{ PC_BASE, PC2_CD }, // 26: reduce cooldown
@@ -2965,7 +2966,8 @@ public class Data {
 			{ PC_IMU, P_IMUBLAST }, // 69: immune to blast todo: when resist blast comes, connect to that talent
 			{ PC_BASE, PC2_ATKP, 1, -1 }, // 70: inc ATK+
 			{ PC_BASE, PC2_HPP, 1, -1 }, // 71: inc HP+
-			{ PC_P, P_CDDEC, 3, -1 } // cd decrease
+			{ PC_P, P_CDDEC, 3, -1 }, // cd decrease
+			{ PC_SPECIAL, PC5_COMBO } //Unlock catcombo
 	};
 	public static final int[][] PC_CUSTOM = new int[][] { //Use negative ints to handle (it would be so awesome, it would be so cool)
 			{ -1, 0 }, // 0:
